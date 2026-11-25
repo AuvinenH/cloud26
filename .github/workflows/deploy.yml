@@ -84,6 +84,7 @@ jobs:
     needs: [infra, validate]
     if: ${{ !cancelled() && needs.infra.result != 'failure' && needs.validate.result == 'success' }}   # ...or when infra was skipped on purpose
     runs-on: ubuntu-latest
+    environment: production
     permissions:
       contents: read
       id-token: write
