@@ -24,6 +24,29 @@ env:
   APP_NAME: app-cloud26-${{ vars.YOUR_NAME }}-dev
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Format check (lint gate)
+        run: dotnet format --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build
+
   infra:
     # A manual run can skip this job (failure demo, Step 21)
     if: github.event_name != 'workflow_dispatch' || inputs.deploy_infra
@@ -56,8 +79,8 @@ jobs:
             --parameters infra/dev.bicepparam yourName="$YOUR_NAME"
 
   app:
-    needs: infra       # app deploys only onto verified infrastructure
-    if: ${{ !cancelled() && needs.infra.result != 'failure' }}   # ...or when infra was skipped on purpose
+    needs: [infra, validate]
+    if: ${{ !cancelled() && needs.infra.result != 'failure' && needs.validate.result == 'success' }}   # ...or when infra was skipped on purpose
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
