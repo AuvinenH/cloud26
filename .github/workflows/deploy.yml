@@ -58,6 +58,7 @@ jobs:
     needs: infra       # app deploys only onto verified infrastructure
     if: ${{ !cancelled() && needs.infra.result != 'failure' }}   # ...or when infra was skipped on purpose
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v5

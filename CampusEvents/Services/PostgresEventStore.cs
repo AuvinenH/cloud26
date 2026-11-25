@@ -7,6 +7,7 @@ namespace CampusEvents.Services;
 /// <summary>
 /// EF Core + PostgreSQL implementation of IEventStore.
 /// State lives in the database — the app itself is now stateless.
+/// small change
 /// </summary>
 public class PostgresEventStore(AppDbContext db) : IEventStore
 {
