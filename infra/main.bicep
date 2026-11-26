@@ -37,6 +37,8 @@ param postgresAdminPassword string
 var planName           = 'plan-cloud26-${yourName}-${environment}'
 var appName            = 'app-cloud26-${yourName}-${environment}'
 var postgresServerName = 'pg-cloud26-${yourName}-${environment}'
+var logAnalyticsName   = 'log-cloud26-${yourName}-${environment}'
+var appInsightsName    = 'appi-cloud26-${yourName}-${environment}'
 var databaseName       = 'campusevents'
 var postgresAdminLogin = 'campusadmin'
 var storageAccountName = 'stcloud26${replace(yourName, '-', '')}${environment}' // letters + digits only, 3-24 chars
@@ -58,6 +60,18 @@ module postgres 'modules/postgres.bicep' = {
     databaseName: databaseName
     administratorLogin: postgresAdminLogin
     administratorLoginPassword: postgresAdminPassword
+    tags: tags
+  }
+}
+
+// --- Monitoring (module) ---
+
+module monitoring 'modules/monitoring.bicep' = {
+  name: 'monitoringDeployment'
+  params: {
+    location: location
+    logAnalyticsName: logAnalyticsName
+    appInsightsName: appInsightsName
     tags: tags
   }
 }
@@ -127,6 +141,10 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
           // removes both later in the course.
           name: 'ConnectionStrings__Storage'
           value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${storageAccountRef.listKeys().keys[0].value};EndpointSuffix=${az.environment().suffixes.storage}'
+        }
+        {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: monitoring.outputs.connectionString
         }
       ]
     }
