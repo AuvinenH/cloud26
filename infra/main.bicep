@@ -39,6 +39,7 @@ var appName            = 'app-cloud26-${yourName}-${environment}'
 var postgresServerName = 'pg-cloud26-${yourName}-${environment}'
 var logAnalyticsName   = 'log-cloud26-${yourName}-${environment}'
 var appInsightsName    = 'appi-cloud26-${yourName}-${environment}'
+var actionGroupName    = 'ag-cloud26-${yourName}-email'
 var databaseName       = 'campusevents'
 var postgresAdminLogin = 'campusadmin'
 var storageAccountName = 'stcloud26${replace(yourName, '-', '')}${environment}' // letters + digits only, 3-24 chars
@@ -148,6 +149,18 @@ resource webApp 'Microsoft.Web/sites@2024-04-01' = {
         }
       ]
     }
+  }
+}
+
+// --- Alerts (module) ---
+
+module alerts 'modules/alerts.bicep' = {
+  name: 'alertsDeployment'
+  params: {
+    alertEmail: ownerEmail
+    webAppId: webApp.id
+    actionGroupName: actionGroupName
+    tags: tags
   }
 }
 
